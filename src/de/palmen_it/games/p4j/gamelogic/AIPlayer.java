@@ -34,10 +34,19 @@ public class AIPlayer extends Player {
 	
 	private int maximize(int depth, int alpha, int beta)
 	{
-		if (depth == _difficulty) return scoreCurrentState();
+		// done when maximal number of movements calculated
+		// or board full
+		if (depth == _difficulty || _board.getNumberOfInserts() == 42) {
+			return scoreCurrentState();
+		}
+		
+		// for top level, remember best scored columns
 		if (depth == 0) {
 			_bestColumns = new ArrayList<Integer>();
 		}
+		
+		// standard minimax / alpha-beta-cutoff
+		// with score interval [-10000; 10000]
 		int localAlpha = -10000;
 		for (int col = 0; col < 7; ++col) {
 			if (_board.insertPieceIn(_piece, col)) {
@@ -52,6 +61,7 @@ public class AIPlayer extends Player {
 					localAlpha = min;
 					if (min > alpha) alpha = min;
 				}
+				
 				else if (depth == 0 && min == localAlpha) _bestColumns.add(col);
 			}
 		}
@@ -59,7 +69,14 @@ public class AIPlayer extends Player {
 	}
 	
 	private int minimize(int depth, int alpha, int beta) {
-		if (depth == _difficulty) return scoreCurrentState();
+		// done when maximal number of movements calculated
+		// or board full
+		if (depth == _difficulty  || _board.getNumberOfInserts() == 42) {
+			return scoreCurrentState();
+		}
+		
+		// standard minimax / alpha-beta-cutoff
+		// with score interval [-10000; 10000]
 		int localBeta = 10000;
 		for (int col = 0; col < 7; ++col) {
 			if (_board.insertPieceIn(_opponentPiece, col)) {
