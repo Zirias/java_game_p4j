@@ -1,5 +1,9 @@
 package de.palmen_it.games.p4j.gamelogic;
 
+/**
+ * Helper class to compare consecutive pieces and determine whether they
+ * belong to a row with a maximum amount of holes.
+ */
 class PieceComparer {
 	private final int _maxMissing;
 	private int _skipped;
@@ -26,8 +30,14 @@ class PieceComparer {
 	
 	public PieceComparer(int maxMissing) {
 		_maxMissing = maxMissing;
+		reset();
 	}
 	
+	/**
+	 * Add a piece to the checked row
+	 * @param p the piece to add
+	 * @return true if this could still result in a match, false otherwise
+	 */
 	public boolean check(Piece p) {
 		if (_reference == Piece.None) {
 			if (p == Piece.None) {
