@@ -292,7 +292,8 @@ public class P4J implements ActionListener {
 		}
 		
 		if (restart) {
-			if (JOptionPane.showConfirmDialog(_frame,
+			if (_board.getNumberOfInserts() == 0 ||
+					JOptionPane.showConfirmDialog(_frame,
 					"Restart game?", "Restart",
 					JOptionPane.OK_CANCEL_OPTION)
 					== JOptionPane.OK_OPTION) {
