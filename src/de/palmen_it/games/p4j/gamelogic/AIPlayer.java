@@ -26,18 +26,16 @@ public class AIPlayer extends Player {
 	private int getWinningScore(int depth) {
 		PlayerRows rows = _board.getRows(0);
 		Piece winner = rows.getWinner();
-		int score = 0;
 		if (winner == _piece) {
-			score = 100;
+			int score = 100;
+			// rate earlier win higher
+			if (score != 0 && depth < 5) score *= (5 - depth);			
+			return score;
 		}
 		else if (winner == _opponentPiece) {
-			return -100;
+			return -500;
 		}
-		
-		// rate earlier win higher
-		if (score != 0 && depth < 5) score *= (5 - depth);
-		
-		return score;
+		return 0;
 	}
 
 	private int scoreCurrentState() {
@@ -48,7 +46,7 @@ public class AIPlayer extends Player {
 			return 100;
 		}
 		else if (winner == _opponentPiece) {
-			return -100;
+			return -500;
 		}
 		score += 10 * (rows.getCount(_piece, 1) - rows.getCount(_opponentPiece,
 				1));
