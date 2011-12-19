@@ -1,6 +1,6 @@
 package de.palmen_it.games.p4j.gamelogic;
 
-public class Board implements Cloneable {
+public class Board {
 
 	private Piece[][] _fields;
 	private int[] _insertHistory;
@@ -11,15 +11,6 @@ public class Board implements Cloneable {
 		_insertHistory = new int[42]; // sequence of columns where pieces were
 										// inserted
 		clear();
-	}
-
-	@Override
-	public Object clone() {
-		Board clone = new Board();
-		for (int row = 0; row < 6; ++row)
-			for (int col = 0; col < 7; ++col)
-				clone._fields[row][col] = _fields[row][col];
-		return clone;
 	}
 
 	public void clear() {
