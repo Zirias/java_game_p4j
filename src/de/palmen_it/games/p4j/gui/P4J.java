@@ -3,63 +3,15 @@ package de.palmen_it.games.p4j.gui;
 import java.awt.EventQueue;
 import java.awt.Insets;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.SwingWorker;
 
 import de.palmen_it.games.p4j.gamelogic.*;
 
 public class P4J {
-
-	private class ColumnButton implements ActionListener {
-		private int _col;
-		private JButton _button;
-		private P4J _owner;
-
-		public JButton getButton() {
-			return _button;
-		}
-
-		public ColumnButton(int col, P4J owner) {
-			_col = col;
-			_owner = owner;
-			_button = new JButton("O");
-			_button.addActionListener(this);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			_owner.ColumnClicked(_col);
-		}
-	}
-
-	private class AIWorker extends SwingWorker<Void, Void> {
-
-		private final Player _player;
-		private final P4J _owner;
-
-		public AIWorker(Player player, P4J owner) {
-			_player = player;
-			_owner = owner;
-		}
-
-		@Override
-		protected Void doInBackground() throws Exception {
-			_player.Move();
-			return null;
-		}
-
-		@Override
-		public void done() {
-			_owner.aiDone();
-		}
-	}
 
 	private JFrame _frame;
 	private ColumnButton[] _buttons;
