@@ -23,16 +23,21 @@ public class AIPlayer extends Player {
 		_opponentPiece = (piece == Piece.Red) ? Piece.Black : Piece.Red;
 	}
 
-	private int getWinningScore() {
+	private int getWinningScore(int depth) {
 		PlayerRows rows = _board.getRows(0);
 		Piece winner = rows.getWinner();
+		int score = 0;
 		if (winner == _piece) {
-			return 200;
+			score = 100;
 		}
 		else if (winner == _opponentPiece) {
-			return -200;
+			return -100;
 		}
-		else return 0;
+		
+		// rate earlier win higher
+		if (score != 0 && depth < 5) score *= (5 - depth);
+		
+		return score;
 	}
 
 	private int scoreCurrentState() {
@@ -40,10 +45,10 @@ public class AIPlayer extends Player {
 		PlayerRows rows = _board.getRows(2);
 		Piece winner = rows.getWinner();
 		if (winner == _piece) {
-			return 200;
+			return 100;
 		}
 		else if (winner == _opponentPiece) {
-			return -200;
+			return -100;
 		}
 		score += 10 * (rows.getCount(_piece, 1) - rows.getCount(_opponentPiece,
 				1));
@@ -59,7 +64,7 @@ public class AIPlayer extends Player {
 		}
 
 		// shortcut for winning position
-		int winningScore = getWinningScore();
+		int winningScore = getWinningScore(depth);
 		if (winningScore != 0) return winningScore;
 		
 		// for top level, remember best scored columns
@@ -68,8 +73,8 @@ public class AIPlayer extends Player {
 		}
 
 		// standard minimax / alpha-beta-cutoff
-		// with score interval [-10000; 10000]
-		int localAlpha = -10000;
+		// with score interval [-500; 500]
+		int localAlpha = -500;
 		for (int col = 0; col < 7; ++col) {
 			if (_board.insertPieceIn(_piece, col)) {
 				int min = minimize(depth + 1, alpha, beta);
@@ -101,12 +106,12 @@ public class AIPlayer extends Player {
 		}
 		
 		// shortcut for winning position
-		int winningScore = getWinningScore();
+		int winningScore = getWinningScore(depth);
 		if (winningScore != 0) return winningScore;
 		
 		// standard minimax / alpha-beta-cutoff
-		// with score interval [-10000; 10000]
-		int localBeta = 10000;
+		// with score interval [-500; 500]
+		int localBeta = 500;
 		for (int col = 0; col < 7; ++col) {
 			if (_board.insertPieceIn(_opponentPiece, col)) {
 				int max = maximize(depth + 1, alpha, beta);
@@ -125,7 +130,7 @@ public class AIPlayer extends Player {
 
 	@Override
 	protected int determineNextColumn() {
-		maximize(0, -10000, 10000);
+		maximize(0, -500, 500);
 		if (_bestColumns.size() == 1)
 			return _bestColumns.get(0);
 		int idx = (int) (Math.random() * (_bestColumns.size() - 1));
