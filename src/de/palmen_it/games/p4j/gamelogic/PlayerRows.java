@@ -40,8 +40,8 @@ public class PlayerRows {
 	
 	public Piece getWinner()
 	{
-		if (_redRows[0] + _blackRows[0] != 1) return Piece.None;
-		if (_blackRows[0] == 1) return Piece.Black;
-		return Piece.Red;
+		if (_redRows[0] > 0 && _blackRows[0] == 0) return Piece.Red;
+		else if (_blackRows[0] > 0 && _redRows[0] == 0) return Piece.Black;
+		else return Piece.None;
 	}
 }

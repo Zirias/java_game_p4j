@@ -22,9 +22,11 @@ public class AIPlayer extends Player {
 	
 	private int scoreCurrentState()
 	{
-		int score;
+		int score = 0;
 		PlayerRows rows = _board.getRows(2);
-		score = 200 * (rows.getCount(_piece, 0) - rows.getCount(_opponentPiece, 0));
+		Piece winner = rows.getWinner();
+		if (winner == _piece) score += 200;
+		else if (winner == _opponentPiece) score -= 200;
 		score += 10 * (rows.getCount(_piece, 1) - rows.getCount(_opponentPiece, 1));
 		score += rows.getCount(_piece, 2) - rows.getCount(_opponentPiece, 2);
 		return score;
