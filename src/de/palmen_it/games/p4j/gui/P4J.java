@@ -18,7 +18,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import de.palmen_it.games.p4j.gamelogic.*;
 
