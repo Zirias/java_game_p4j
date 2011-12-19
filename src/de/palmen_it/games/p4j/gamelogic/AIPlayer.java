@@ -6,6 +6,7 @@ public class AIPlayer extends Player {
 
 	private final Piece _opponentPiece;
 	private final ArrayList<Integer> _bestColumns;
+	private int[] _columnScores;
 	private int _difficulty;
 
 	/**
@@ -26,11 +27,16 @@ public class AIPlayer extends Player {
 		return _bestColumns;
 	}
 	
+	public int[] getColumnScores() {
+		return _columnScores;
+	}
+	
 	public AIPlayer(Board board, Piece piece) {
 		super(board, piece, false);
 		_difficulty = 6;
 		_opponentPiece = (piece == Piece.Red) ? Piece.Black : Piece.Red;
 		_bestColumns = new ArrayList<Integer>();
+		_columnScores = new int[7];
 	}
 
 	private int getWinningScore(int depth) {
@@ -99,6 +105,10 @@ public class AIPlayer extends Player {
 				// for top level, remember best scored columns
 				else if (depth == 0 && min == localAlpha)
 					_bestColumns.add(col);
+				if (depth == 0) _columnScores[col] = min;
+			}
+			else if (depth == 0) {
+				_columnScores[col] = -500;
 			}
 		}
 		return localAlpha;

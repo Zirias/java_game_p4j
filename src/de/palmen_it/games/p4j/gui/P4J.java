@@ -1,5 +1,6 @@
 package de.palmen_it.games.p4j.gui;
 
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Insets;
 import java.awt.GridLayout;
@@ -16,6 +17,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import de.palmen_it.games.p4j.gamelogic.*;
 
@@ -47,6 +50,9 @@ public class P4J implements ActionListener {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		try {
+			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+		} catch (Exception e) { }
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -69,10 +75,10 @@ public class P4J implements ActionListener {
 	public void ColumnClicked(int col) {
 		HumanPlayer player = (HumanPlayer) _players[_activePlayer];
 		player.setNextColumn(col);
-		if (player.Move()) {
+		if (player.move()) {
 			_activePlayer = (_activePlayer == 0) ? 1 : 0;
-			UpdateButtons();
-			UpdateField();
+			updateButtons();
+			updateField();
 			if (CheckWinner()) return;
 			if (!_players[_activePlayer].getIsHuman()) {
 				_aiWorker = new AIWorker(_players[_activePlayer], this);
@@ -92,8 +98,8 @@ public class P4J implements ActionListener {
 		} else {
 			_assistentReady = false;
 			_activePlayer = (_activePlayer == 0) ? 1 : 0;
-			UpdateButtons();
-			UpdateField();
+			updateButtons();
+			updateField();
 			CheckWinner();
 		}
 	}
@@ -146,10 +152,10 @@ public class P4J implements ActionListener {
 		_aiWorker = null;
 		
 		_board.clear();
-		UpdateField();
+		updateField();
 		
 		if (_assistent == null) {
-			UpdateButtons();
+			updateButtons();
 		} else {
 			_assistentReady = true;
 			_activePlayer = 1;
@@ -158,7 +164,7 @@ public class P4J implements ActionListener {
 		}
 	}
 	
-	private void UpdateField() {
+	private void updateField() {
 		for (int row = 0; row < 6; ++row)
 			for (int col = 0; col < 7; ++col)
 				switch (_board.getPieceAt(row, col)) {
@@ -174,14 +180,33 @@ public class P4J implements ActionListener {
 				}
 	}
 	
-	private void UpdateButtons() {
+	private void updateButtons() {
 		boolean isHuman = _players[_activePlayer].getIsHuman();
 		boolean isUnassisted = isHuman && _assistent == null;
+		boolean isAssisted = isHuman && _assistent != null;
+		
+		int[] scores = null;
+		if (isAssisted) scores = _assistent.getColumnScores();
+		
+		int i = 0;
 		for (ColumnButton b: _buttons) {
 			b.getButton().setEnabled(isHuman);
 			b.getButton().setText(isUnassisted ? "O" : "");
+			if (isAssisted) {
+				int score = scores[i++];
+				if (score < -100) score = -100;
+				if (score > 100) score = 100;
+				float red = 100;
+				float green = 100;
+				if (score < 0) green += score;
+				if (score > 0) red -= score;
+				Color c = new Color(red/100, green/100, 0);
+				b.getButton().setBackground(c);
+			} else {
+				b.getButton().setBackground(null);
+			}
 		}
-		if (isHuman && _assistent != null) {
+		if (isAssisted) {
 			for (int col: _assistent.getBestColumns()) {
 				_buttons[col].getButton().setText("O");
 			}
@@ -219,6 +244,7 @@ public class P4J implements ActionListener {
 				+ insets.bottom);
 		_frame.setResizable(false);
 		_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		_frame.setTitle("P4J - Puissance 4 Java");
 		_frame.getContentPane().setLayout(new GridLayout(7, 0, 0, 0));
 		_frame.addMouseListener(new PopupListener());
 

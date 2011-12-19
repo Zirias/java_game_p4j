@@ -16,7 +16,7 @@ class AIWorker extends SwingWorker<Void, Void> {
 
 	@Override
 	protected Void doInBackground() throws Exception {
-		_player.Move();
+		_player.move();
 		return null;
 	}
 

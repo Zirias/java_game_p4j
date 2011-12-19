@@ -18,7 +18,7 @@ public abstract class Player {
 
 	protected abstract int determineNextColumn();
 
-	public boolean Move() {
+	public boolean move() {
 		return _board.insertPieceIn(_piece, determineNextColumn());
 	}
 }
