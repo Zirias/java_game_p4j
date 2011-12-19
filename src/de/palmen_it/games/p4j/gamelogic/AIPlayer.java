@@ -5,9 +5,14 @@ import java.util.ArrayList;
 public class AIPlayer extends Player {
 
 	private final Piece _opponentPiece;
+	private final ArrayList<Integer> _bestColumns;
 	private int _difficulty;
-	private ArrayList<Integer> _bestColumns;
 
+	/**
+	 * Set difficulty of the game, the value determines how
+	 * many moves are calculated for scoring
+	 * @param value the new difficulty (minimum 2, maximum 12)
+	 */
 	public void setDifficulty(int value) {
 		if (value < 2)
 			_difficulty = 2;
@@ -21,6 +26,7 @@ public class AIPlayer extends Player {
 		super(board, piece, false);
 		_difficulty = 6;
 		_opponentPiece = (piece == Piece.Red) ? Piece.Black : Piece.Red;
+		_bestColumns = new ArrayList<Integer>();
 	}
 
 	private int getWinningScore(int depth) {
@@ -65,11 +71,6 @@ public class AIPlayer extends Player {
 		int winningScore = getWinningScore(depth);
 		if (winningScore != 0) return winningScore;
 		
-		// for top level, remember best scored columns
-		if (depth == 0) {
-			_bestColumns = new ArrayList<Integer>();
-		}
-
 		// standard minimax / alpha-beta-cutoff
 		// with score interval [-500; 500]
 		int localAlpha = -500;
@@ -78,6 +79,7 @@ public class AIPlayer extends Player {
 				int min = minimize(depth + 1, alpha, beta);
 				_board.undoInsertion();
 				if (min > localAlpha) {
+					// for top level, remember best scored columns
 					if (depth == 0) {
 						_bestColumns.clear();
 						_bestColumns.add(col);
@@ -89,6 +91,7 @@ public class AIPlayer extends Player {
 						alpha = min;
 				}
 
+				// for top level, remember best scored columns
 				else if (depth == 0 && min == localAlpha)
 					_bestColumns.add(col);
 			}
