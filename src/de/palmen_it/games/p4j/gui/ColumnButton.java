@@ -17,7 +17,8 @@ class ColumnButton implements ActionListener {
 	public ColumnButton(int col, P4J owner) {
 		_col = col;
 		_owner = owner;
-		_button = new JButton("O");
+		_button = new JButton("");
+		_button.setEnabled(false);
 		_button.addActionListener(this);
 	}
 

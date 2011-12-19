@@ -3,26 +3,43 @@ package de.palmen_it.games.p4j.gui;
 import java.awt.EventQueue;
 import java.awt.Insets;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButtonMenuItem;
 
 import de.palmen_it.games.p4j.gamelogic.*;
 
-public class P4J {
+public class P4J implements ActionListener {
 
 	private JFrame _frame;
 	private ColumnButton[] _buttons;
 	private JLabel[][] _fields;
+	private JPopupMenu _menu;
 	private ImageIcon _red;
 	private ImageIcon _black;
 
 	private Board _board;
 	private Player[] _players;
 	private int _activePlayer;
+	private AIPlayer _assistent;
+	private boolean _assistentReady;
 
+	private final int MODE_1 = 1;
+	private final int MODE_2 = 2;
+	private final int MODE_1a = 3;
+	
+	private int _mode;
+	
 	/**
 	 * Launch the application.
 	 */
@@ -61,28 +78,58 @@ public class P4J {
 	}
 
 	public void aiDone() {
-		_activePlayer = (_activePlayer == 0) ? 1 : 0;
-		UpdateButtons();
-		UpdateField();
-		CheckWinner();
+		if (_assistent != null && !_assistentReady) {
+			new AssistentWorker(_assistent, this).execute();
+			_assistentReady = true;
+		} else {
+			_assistentReady = false;
+			_activePlayer = (_activePlayer == 0) ? 1 : 0;
+			UpdateButtons();
+			UpdateField();
+			CheckWinner();
+		}
 	}
 
 	private void CheckWinner() {
 		if (_board.getNumberOfInserts() == 42)
 		{
 			JOptionPane.showMessageDialog(_frame, "Draw game!");
-			_board.clear();
-			UpdateField();
+			restart();
 			return;
 		}
 		Piece winner = _board.getRows(0).getWinner();
 		if (winner != Piece.None) {
 			JOptionPane.showMessageDialog(_frame, winner.toString() + " wins!");
-			_board.clear();
-			UpdateField();
+			restart();
 		}
 	}
 
+	private void restart() {
+		_players[0] = new HumanPlayer(_board, Piece.Black);
+		if (_mode == MODE_1a) {
+			_assistent = new AIPlayer(_board, Piece.Black);
+		} else {
+			_assistent = null;
+		}
+		if (_mode == MODE_2) {
+			_players[1] = new HumanPlayer(_board, Piece.Red);
+		} else {
+			_players[1] = new AIPlayer(_board, Piece.Red);
+		}
+		_activePlayer = 0;
+		
+		_board.clear();
+		UpdateField();
+		
+		if (_assistent == null) {
+			UpdateButtons();
+		} else {
+			_assistentReady = true;
+			_activePlayer = 1;
+			new AssistentWorker(_assistent, this).execute();
+		}
+	}
+	
 	private void UpdateField() {
 		for (int row = 0; row < 6; ++row)
 			for (int col = 0; col < 7; ++col)
@@ -101,11 +148,38 @@ public class P4J {
 	
 	private void UpdateButtons() {
 		boolean isHuman = _players[_activePlayer].getIsHuman();
+		boolean isUnassisted = isHuman && _assistent == null;
 		for (ColumnButton b: _buttons) {
 			b.getButton().setEnabled(isHuman);
+			b.getButton().setText(isUnassisted ? "O" : "");
+		}
+		if (isHuman && _assistent != null) {
+			for (int col: _assistent.getBestColumns()) {
+				_buttons[col].getButton().setText("O");
+			}
 		}
 	}
 
+	class PopupListener extends MouseAdapter {
+		
+		 @Override
+		 public void mousePressed(MouseEvent e) {
+			 maybeShowPopup(e);
+		 }
+
+		 @Override
+		 public void mouseReleased(MouseEvent e) {
+			 maybeShowPopup(e);
+		 }
+
+		private void maybeShowPopup(MouseEvent e) {
+			if (e.isPopupTrigger()) {
+				_menu.show(e.getComponent(), e.getX(), e.getY());
+			}
+			
+		}
+	}
+	
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -118,6 +192,7 @@ public class P4J {
 		_frame.setResizable(false);
 		_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		_frame.getContentPane().setLayout(new GridLayout(7, 0, 0, 0));
+		_frame.addMouseListener(new PopupListener());
 
 		_buttons = new ColumnButton[7];
 		for (int col = 0; col < 7; ++col) {
@@ -133,18 +208,67 @@ public class P4J {
 				_fields[row][col] = lbl;
 				_frame.add(lbl);
 			}
+		
+		_menu = new JPopupMenu();
+		JMenuItem item;
+		item = new JMenuItem("Restart");
+		item.setActionCommand("restart");
+		item.addActionListener(this);
+		_menu.add(item);
+		_menu.addSeparator();
+		JRadioButtonMenuItem rbItem;
+		ButtonGroup group;
+		group = new ButtonGroup();
+		rbItem = new JRadioButtonMenuItem("2 Player");
+		rbItem.setActionCommand("mode_2");
+		rbItem.addActionListener(this);
+		group.add(rbItem);
+		_menu.add(rbItem);
+		rbItem = new JRadioButtonMenuItem("1 Player");
+		rbItem.setActionCommand("mode_1");
+		rbItem.addActionListener(this);
+		rbItem.setSelected(true);
+		group.add(rbItem);
+		_menu.add(rbItem);
+		rbItem = new JRadioButtonMenuItem("1 Player assisted");
+		rbItem.setActionCommand("mode_1a");
+		rbItem.addActionListener(this);
+		group.add(rbItem);
+		_menu.add(rbItem);
 
 		_black = new ImageIcon(getClass().getResource("black.png"));
 		_red = new ImageIcon(getClass().getResource("red.png"));
 		_board = new Board();
 		_players = new Player[2];
-		_players[0] = new HumanPlayer(_board, Piece.Black);
-		AIPlayer ai = new AIPlayer(_board, Piece.Red);
-		ai.setDifficulty(6);
-		_players[1] = ai;
-		_activePlayer = 0;
 		
-		UpdateButtons();
+		restart();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		String command = e.getActionCommand();
+		boolean restart = false;
+		if (command == "restart") {
+			restart = true;
+		} else if (command == "mode_1") {
+			_mode = MODE_1;
+			restart = true;
+		} else if (command == "mode_2") {
+			_mode = MODE_2;
+			restart = true;
+		} else if (command == "mode_1a") {
+			_mode = MODE_1a;
+			restart = true;
+		}
+		
+		if (restart) {
+			if (JOptionPane.showConfirmDialog(_frame,
+					"Restart game?", "Restart",
+					JOptionPane.OK_CANCEL_OPTION)
+					== JOptionPane.OK_OPTION) {
+				restart();
+			}
+		}
 	}
 
 }

@@ -22,6 +22,10 @@ public class AIPlayer extends Player {
 			_difficulty = value;
 	}
 
+	public ArrayList<Integer> getBestColumns() {
+		return _bestColumns;
+	}
+	
 	public AIPlayer(Board board, Piece piece) {
 		super(board, piece, false);
 		_difficulty = 6;
@@ -129,6 +133,10 @@ public class AIPlayer extends Player {
 		return localBeta;
 	}
 
+	public void ComputeBestColumns() {
+		maximize(0, -500, 500);
+	}
+	
 	@Override
 	protected int determineNextColumn() {
 		maximize(0, -500, 500);
