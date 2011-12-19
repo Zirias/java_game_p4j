@@ -34,6 +34,9 @@ public class P4J implements ActionListener {
 	private AIPlayer _assistent;
 	private boolean _assistentReady;
 
+	private AIWorker _aiWorker;
+	private AssistentWorker _assistentWorker;
+	
 	private final int MODE_1 = 1;
 	private final int MODE_2 = 2;
 	private final int MODE_1a = 3;
@@ -70,16 +73,21 @@ public class P4J implements ActionListener {
 			_activePlayer = (_activePlayer == 0) ? 1 : 0;
 			UpdateButtons();
 			UpdateField();
-			CheckWinner();
+			if (CheckWinner()) return;
 			if (!_players[_activePlayer].getIsHuman()) {
-				new AIWorker(_players[_activePlayer], this).execute();
+				_aiWorker = new AIWorker(_players[_activePlayer], this);
+				_aiWorker.execute();
 			}
 		}
 	}
 
 	public void aiDone() {
+		_aiWorker = null;
+		_assistentWorker = null;
+		
 		if (_assistent != null && !_assistentReady) {
-			new AssistentWorker(_assistent, this).execute();
+			_assistentWorker = new AssistentWorker(_assistent, this);
+			_assistentWorker.execute();
 			_assistentReady = true;
 		} else {
 			_assistentReady = false;
@@ -90,21 +98,38 @@ public class P4J implements ActionListener {
 		}
 	}
 
-	private void CheckWinner() {
+	private boolean CheckWinner() {
 		if (_board.getNumberOfInserts() == 42)
 		{
 			JOptionPane.showMessageDialog(_frame, "Draw game!");
 			restart();
-			return;
+			return true;
 		}
 		Piece winner = _board.getRows(0).getWinner();
 		if (winner != Piece.None) {
 			JOptionPane.showMessageDialog(_frame, winner.toString() + " wins!");
 			restart();
+			return true;
 		}
+		return false;
 	}
 
 	private void restart() {
+		if (_assistentWorker != null) { 
+			_assistentWorker.cancel(true);
+			try {
+				_assistentWorker.wait();
+			} catch (InterruptedException e) {
+			}
+		}
+		if (_aiWorker != null) {
+			_aiWorker.cancel(true);
+			try {
+				_aiWorker.wait();
+			} catch (InterruptedException e) {
+			}			
+		}
+		
 		_players[0] = new HumanPlayer(_board, Piece.Black);
 		if (_mode == MODE_1a) {
 			_assistent = new AIPlayer(_board, Piece.Black);
@@ -117,6 +142,8 @@ public class P4J implements ActionListener {
 			_players[1] = new AIPlayer(_board, Piece.Red);
 		}
 		_activePlayer = 0;
+		_assistentWorker = null;
+		_aiWorker = null;
 		
 		_board.clear();
 		UpdateField();
@@ -126,7 +153,8 @@ public class P4J implements ActionListener {
 		} else {
 			_assistentReady = true;
 			_activePlayer = 1;
-			new AssistentWorker(_assistent, this).execute();
+			_assistentWorker = new AssistentWorker(_assistent, this);
+			_assistentWorker.execute();
 		}
 	}
 	
@@ -240,6 +268,8 @@ public class P4J implements ActionListener {
 		_red = new ImageIcon(getClass().getResource("red.png"));
 		_board = new Board();
 		_players = new Player[2];
+		_aiWorker = null;
+		_assistentWorker = null;
 		
 		restart();
 	}
