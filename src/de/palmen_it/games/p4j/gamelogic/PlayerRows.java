@@ -19,10 +19,10 @@ public class PlayerRows {
 	{
 		if (missing < 0 || missing > _maxMissingPieces) return;
 		switch (p) {
-		case Black:
+		case YELLOW:
 			++_blackRows[missing];
 			break;
-		case Red:
+		case RED:
 			++_redRows[missing];
 			break;
 		}
@@ -32,16 +32,16 @@ public class PlayerRows {
 	{
 		if (missing < 0 || missing > _maxMissingPieces) return 0;
 		switch (p) {
-		case Black: return _blackRows[missing];
-		case Red: return _redRows[missing];
+		case YELLOW: return _blackRows[missing];
+		case RED: return _redRows[missing];
 		default: return _redRows[missing] + _blackRows[missing];
 		}
 	}
 	
 	public Piece getWinner()
 	{
-		if (_redRows[0] > 0 && _blackRows[0] == 0) return Piece.Red;
-		else if (_blackRows[0] > 0 && _redRows[0] == 0) return Piece.Black;
-		else return Piece.None;
+		if (_redRows[0] > 0 && _blackRows[0] == 0) return Piece.RED;
+		else if (_blackRows[0] > 0 && _redRows[0] == 0) return Piece.YELLOW;
+		else return Piece.EMPTY;
 	}
 }

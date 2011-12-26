@@ -1,5 +1,6 @@
 package de.palmen_it.games.p4j.gui;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -18,6 +19,7 @@ class ColumnButton implements ActionListener {
 		_col = col;
 		_owner = owner;
 		_button = new JButton("");
+		_button.setPreferredSize(new Dimension(48, 48));
 		_button.setEnabled(false);
 		_button.addActionListener(this);
 	}

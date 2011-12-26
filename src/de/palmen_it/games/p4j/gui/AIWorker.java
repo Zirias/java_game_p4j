@@ -16,7 +16,11 @@ class AIWorker extends SwingWorker<Void, Void> {
 
 	@Override
 	protected Void doInBackground() throws Exception {
-		_player.move();
+		if (_player.getIsHuman()) {
+			_player.getBestColumns();
+		} else {
+			_player.move();
+		}
 		return null;
 	}
 

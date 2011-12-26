@@ -11,13 +11,13 @@ class PieceComparer {
 	private Piece _reference;
 	
 	public void reset() {
-		_reference = Piece.None;
+		_reference = Piece.EMPTY;
 		_skipped = 0;
 		_isMatch = true;
 	}
 	
 	public boolean getIsMatch() {
-		return _isMatch && _reference != Piece.None;
+		return _isMatch && _reference != Piece.EMPTY;
 	}
 	
 	public int getSkipped() {
@@ -39,8 +39,8 @@ class PieceComparer {
 	 * @return true if this could still result in a match, false otherwise
 	 */
 	public boolean check(Piece p) {
-		if (_reference == Piece.None) {
-			if (p == Piece.None) {
+		if (_reference == Piece.EMPTY) {
+			if (p == Piece.EMPTY) {
 				if (_skipped < _maxMissing) ++_skipped;
 				else {
 					_isMatch = false;
@@ -50,7 +50,7 @@ class PieceComparer {
 			else _reference = p;
 		} else {
 			if (p != _reference) {
-				if (p == Piece.None && _skipped < _maxMissing) {
+				if (p == Piece.EMPTY && _skipped < _maxMissing) {
 					++_skipped;
 				} else {
 					_isMatch = false;
