@@ -128,21 +128,26 @@ public class P4J implements ActionListener {
 			} catch (InterruptedException e) {
 			}
 		}
+		
+		_board.clear();
 
 		_isAssisted = _mode == MODE_1a;
+		_assistentReady = false;
 		_player2.setIsHuman(_mode == MODE_2);
-		_activePlayer = _player1;
 		_aiWorker = null;
 
-		_board.clear();
 		updateField();
 
-		if (!_isAssisted) {
+		if (_isAssisted) {
+			_activePlayer = _player2;
 			updateButtons();
-		} else {
+			_activePlayer = _player1;
 			_assistentReady = true;
 			_aiWorker = new AIWorker(_activePlayer, this);
 			_aiWorker.execute();
+		} else {
+			_activePlayer = _player1;
+			updateButtons();			
 		}
 	}
 

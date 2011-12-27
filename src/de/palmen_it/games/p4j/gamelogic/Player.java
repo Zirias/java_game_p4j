@@ -25,7 +25,7 @@ public class Player {
 	private final Piece _opponentPiece;
 	private final ArrayList<Integer> _bestColumns;
 	private int[] _columnScores;
-	private boolean _isScored;
+	private int _scoredState;
 	private boolean _isHuman;
 	private int _lastRow;
 	private int _lastColumn;
@@ -73,7 +73,7 @@ public class Player {
 		}
 		_bestColumns = new ArrayList<Integer>();
 		_columnScores = new int[7];
-		_isScored = false;
+		_scoredState = -1;
 		_lastRow = -1;
 		_lastColumn = -1;
 	}
@@ -184,9 +184,10 @@ public class Player {
 	}
 
 	private void computeBestColumns() {
-		if (!_isScored) {
+		int state = _board.getNumberOfInserts();
+		if (state != _scoredState) {
 			maximize(0, -500, 500);
-			_isScored = true;
+			_scoredState = state;
 		}
 	}
 	
@@ -207,7 +208,6 @@ public class Player {
 	}
 	
 	public boolean move(int column) {
-		_isScored = false;
 		int row = _board.insertPieceIn(_piece, column);
 		if (row >= 0) {
 			_lastRow = row;
