@@ -19,6 +19,10 @@ public class Player {
 		else
 			_difficulty = value;
 	}
+	
+	public static int getDifficulty() {
+		return _difficulty;
+	}
 
 	private final Board _board;
 	private final Piece _piece;
