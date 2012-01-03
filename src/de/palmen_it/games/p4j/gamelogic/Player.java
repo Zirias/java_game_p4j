@@ -130,6 +130,8 @@ public class Player {
 	}
 
 	private int maximize(AITaskDescriptor task, int depth, int alpha, int beta) {
+		if (task.isCancelled()) return 0;
+		
 		// done when maximal number of movements calculated
 		// or board full
 		if (depth == _difficulty || _board.getNumberOfInserts() == 42) {
@@ -168,11 +170,14 @@ public class Player {
 			else if (depth == 0) {
 				_columnScores[col] = -500;
 			}
+			if (task.isCancelled()) return 0;
 		}
 		return localAlpha;
 	}
 
 	private int minimize(AITaskDescriptor task, int depth, int alpha, int beta) {
+		if (task.isCancelled()) return 0;
+		
 		// done when maximal number of movements calculated
 		// or board full
 		if (depth == _difficulty || _board.getNumberOfInserts() == 42) {
@@ -198,6 +203,7 @@ public class Player {
 						beta = max;
 				}
 			}
+			if (task.isCancelled()) return 0;
 		}
 		return localBeta;
 	}
