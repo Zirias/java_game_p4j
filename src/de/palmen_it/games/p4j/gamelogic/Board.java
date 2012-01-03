@@ -1,7 +1,10 @@
 package de.palmen_it.games.p4j.gamelogic;
 
-public class Board {
+import java.io.Serializable;
 
+public class Board implements Serializable {
+	private static final long serialVersionUID = 8538141074979359100L;
+	
 	private Piece[][] _fields;
 	private int[][] _insertHistory;
 	private int _numberOfInserts;
