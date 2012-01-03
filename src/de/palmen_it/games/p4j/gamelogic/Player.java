@@ -4,6 +4,11 @@ import java.util.ArrayList;
 
 public class Player {
 
+	static class DefaultTaskDescriptor implements AITaskDescriptor {
+		public boolean isCancelled() { return false; }
+		public static final DefaultTaskDescriptor Instance = new DefaultTaskDescriptor();
+	}
+	
 	private static int _difficulty = 6;
 
 	/**
@@ -53,14 +58,24 @@ public class Player {
 	public int getLastColumn() {
 		return _lastColumn;
 	}
-	
+
 	public ArrayList<Integer> getBestColumns() {
-		computeBestColumns();
+		return getBestColumns(DefaultTaskDescriptor.Instance);
+	}
+	
+	public ArrayList<Integer> getBestColumns(AITaskDescriptor task) {
+		computeBestColumns(task);
+		if (task.isCancelled()) return null;
 		return _bestColumns;
 	}
 	
 	public int[] getColumnScores() {
-		computeBestColumns();
+		return getColumnScores(DefaultTaskDescriptor.Instance);
+	}
+	
+	public int[] getColumnScores(AITaskDescriptor task) {
+		computeBestColumns(task);
+		if (task.isCancelled()) return null;
 		return _columnScores;
 	}
 	
@@ -114,7 +129,7 @@ public class Player {
 		return score;
 	}
 
-	private int maximize(int depth, int alpha, int beta) {
+	private int maximize(AITaskDescriptor task, int depth, int alpha, int beta) {
 		// done when maximal number of movements calculated
 		// or board full
 		if (depth == _difficulty || _board.getNumberOfInserts() == 42) {
@@ -130,7 +145,7 @@ public class Player {
 		int localAlpha = -500;
 		for (int col = 0; col < 7; ++col) {
 			if (_board.insertPieceIn(_piece, col) >= 0) {
-				int min = minimize(depth + 1, alpha, beta);
+				int min = minimize(task, depth + 1, alpha, beta);
 				_board.undoInsertion();
 				if (min > localAlpha) {
 					// for top level, remember best scored columns
@@ -157,7 +172,7 @@ public class Player {
 		return localAlpha;
 	}
 
-	private int minimize(int depth, int alpha, int beta) {
+	private int minimize(AITaskDescriptor task, int depth, int alpha, int beta) {
 		// done when maximal number of movements calculated
 		// or board full
 		if (depth == _difficulty || _board.getNumberOfInserts() == 42) {
@@ -173,7 +188,7 @@ public class Player {
 		int localBeta = 500;
 		for (int col = 0; col < 7; ++col) {
 			if (_board.insertPieceIn(_opponentPiece, col) >= 0) {
-				int max = maximize(depth + 1, alpha, beta);
+				int max = maximize(task, depth + 1, alpha, beta);
 				_board.undoInsertion();
 				if (max < localBeta) {
 					if (max < alpha)
@@ -187,16 +202,17 @@ public class Player {
 		return localBeta;
 	}
 
-	private void computeBestColumns() {
+	private void computeBestColumns(AITaskDescriptor task) {
 		int state = _board.getNumberOfInserts();
 		if (state != _scoredState) {
-			maximize(0, -500, 500);
+			maximize(task, 0, -500, 500);
+			if (task.isCancelled()) return;
 			_scoredState = state;
 		}
 	}
-	
-	private int chooseColumn() {
-		computeBestColumns();
+
+	private int chooseColumn(AITaskDescriptor task) {
+		computeBestColumns(task);
 		if (_bestColumns.size() == 1)
 			return _bestColumns.get(0);
 		int idx = (int) (Math.random() * (_bestColumns.size()));
@@ -204,11 +220,17 @@ public class Player {
 	}
 
 	public boolean move() {
+		return move(DefaultTaskDescriptor.Instance);
+	}
+	
+	public boolean move(AITaskDescriptor task) {
 		if (_isHuman) {
 			throw new IllegalStateException(
 					"A human player cannot choose a column automatically.");
 		}
-		return move(chooseColumn());
+		int col = chooseColumn(task);
+		if (task.isCancelled()) return false;
+		return move(col);
 	}
 	
 	public boolean move(int column) {
