@@ -96,7 +96,7 @@ public class Board implements Serializable {
 						rows.addRow(cmp.getPiece(), cmp.getSkipped());
 					cmp.reset();
 				}
-				if (row > 3 && col < 4) {
+				if (row > 2 && col < 4) {
 					for (int checkrow = row, checkcol = col; checkcol < col + 4; --checkrow, ++checkcol) {
 						if (!cmp.check(_fields[checkrow][checkcol]))
 							break;
