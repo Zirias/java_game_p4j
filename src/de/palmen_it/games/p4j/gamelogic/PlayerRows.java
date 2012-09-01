@@ -25,6 +25,8 @@ public class PlayerRows {
 		case RED:
 			++_redRows[missing];
 			break;
+		default:
+			throw new java.lang.IllegalArgumentException("Given Piece p must be YELLOW or RED.");
 		}
 	}
 	
